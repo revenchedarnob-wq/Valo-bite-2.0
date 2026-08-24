@@ -27,15 +27,26 @@ npm run build    # type-check + production bundle to dist/
 npm run preview  # serve the production build
 ```
 
-> The built site must be served over HTTP (`vite preview`) — opening
-> `dist/index.html` from disk won't work because of ES module restrictions.
+The production `dist/index.html` must be served over HTTP (`vite preview`)
+and assumes the base path of the deployed site (see below).
 
-## Deployment
+## Deployment (GitHub Pages)
 
-Every push to `main` builds the site and deploys it to **GitHub Pages** via
-`.github/workflows/deploy.yml`. Pages serves from a sub-path, so CI sets
-`VITE_BASE=/Valo-bite-2.0/`; a generated `404.html` keeps client-side routing
-working on deep links.
+This repository deploys via `.github/workflows/deploy.yml` on every push to
+`main` **using the GitHub Actions Pages source** — the Pages site must be
+authorized in Settings → Pages → Build and deployment → Source →
+**GitHub Actions**.
+
+GitHub Pages serves the repo under `/Valo-bite-2.0/`, so:
+
+- `vite.config.ts` sets `base` to `/Valo-bite-2.0/` (default),
+- `src/App.tsx` seeds `<BrowserRouter basename={import.meta.env.BASE_URL}>`,
+- the workflow sets `VITE_BASE=/Valo-bite-2.0/` and copies `dist/index.html`
+  to `dist/404.html` so deep links (e.g. `/archive/petal-field-pavilion`)
+  resolve with client-side routing.
+
+> `npm run dev` explicitly uses `--base /` so the dev server stays at the
+> root for a fast local loop; production builds keep the subpath base.
 
 ## Accessibility & comfort
 

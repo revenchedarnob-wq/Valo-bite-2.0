@@ -56,7 +56,7 @@ export default function App() {
   useEffect(() => initSmoothScroll(), []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="grain max-w-[100vw] min-h-svh overflow-x-clip bg-alabaster text-ink">
         <ScrollToTop />
         <AnimatePresence>
