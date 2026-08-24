@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+@theme {
+  /* ——— Quiet Luxury palette ——— */
+  --color-alabaster: #f4f3ef;
+  --color-alabaster-deep: #eceae2;
+  --color-ink: #211e19;
+  --color-ink-soft: #57524a;
+  --color-stone-mute: #948d80;
+  --color-clay: #b3a184;
+  --color-frost: rgba(255, 255, 255, 0.42);
+
+  /* ——— Dual typography pairing ——— */
+  --font-display: "Instrument Serif", "Georgia", serif;
+  --font-sans: "Instrument Sans", "Helvetica Neue", sans-serif;
+
+  /* ——— Motion character ——— */
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-float-slow: floaty 7s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes floaty {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ——— Respect users who prefer reduced motion ——— */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+  }
+}
+
+body {
+  @apply bg-alabaster text-ink font-sans antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-alabaster);
+}
+
+/* ——— Keyboard focus: visible only for keyboard users ——— */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.frost-pill :focus-visible,
+.rounded-full:focus-visible {
+  border-radius: 9999px;
+}
+
+/* ——— Custom scrollbar, matched to the palette ——— */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(33, 30, 25, 0.28) transparent;
+  /* Reserve gutter space so full-screen route swaps never cause layout shift */
+  scrollbar-gutter: stable;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(33, 30, 25, 0.22);
+  border-radius: 999px;
+  border: 3px solid var(--color-alabaster);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(179, 161, 132, 0.85);
+}
+
+/* ——— Film grain overlay for tactile warmth ——— */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2%, 3%);
+  }
+  50% {
+    transform: translate(3%, -2%);
+  }
+  75% {
+    transform: translate(-3%, -3%);
+  }
+}
+
+/* ——— Sonar ripple ring (hover-revealed acoustic pulse) ——— */
+.ring-ripple {
+  width: 28px;
+  height: 28px;
+  animation: ring-ripple 3.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes ring-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(7);
+    opacity: 0;
+  }
+}
+
+/* ——— Frosted pill primitive ——— */
+.frost-pill {
+  @apply border border-white/60 backdrop-blur-xl;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0.22)
+  );
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.7) inset,
+    0 12px 32px -12px rgba(33, 30, 25, 0.18);
+}
+
+/* ——— Hairline editorial rules ——— */
+.hairline {
+  @apply border-ink/10;
+}
+
+/* ——— Custom cursor: hide native cursor on precise pointers ——— */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* ——— Shine sweep for solid buttons ——— */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(244, 243, 239, 0.35) 50%,
+    transparent 58%
+  );
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  transform: translateX(130%) skewX(-18deg);
+}
