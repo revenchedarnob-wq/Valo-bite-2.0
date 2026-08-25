@@ -6,46 +6,25 @@ type SplitRevealProps = {
   text: string;
   className?: string;
   delay?: number;
-  /** Seconds between each word. */
   stagger?: number;
 };
 
-/**
- * SplitReveal — word-by-word masked rise for headings.
- * Each word slides up out of an overflow-hidden clip.
- */
+const EASE_LUXE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function SplitReveal({
   text,
   className = "",
   delay = 0,
-  stagger = 0.055,
 }: SplitRevealProps) {
-  const words = text.split(" ");
   return (
-    <span className={`inline ${className}`} aria-label={text}>
-      {words.map((word, i) => (
-        <span
-          key={`${word}-${i}`}
-          aria-hidden
-          className="inline-block overflow-hidden align-bottom pb-[0.08em] -mb-[0.08em]"
-        >
-          <motion.span
-            className="inline-block will-change-transform"
-            initial={{ y: "112%" }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{
-              type: "spring",
-              stiffness: 260,
-              damping: 26,
-              delay: delay + i * stagger,
-            }}
-          >
-            {word}
-          </motion.span>
-          {i < words.length - 1 ? "\u00A0" : ""}
-        </span>
-      ))}
-    </span>
+    <motion.span
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.75, ease: EASE_LUXE, delay }}
+      className={`inline text-inherit ${className}`}
+    >
+      {text}
+    </motion.span>
   );
 }

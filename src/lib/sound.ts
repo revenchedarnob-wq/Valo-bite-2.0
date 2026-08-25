@@ -395,3 +395,9 @@ export function stopAmbientTelemetry(): void {
   ambient?.stop();
   ambient = null;
 }
+
+// Compatibility aliases for Universal Sound Studio
+export const playHapticGlass = playHapticChime;
+export const playHapticPop = playHapticFlick;
+export const playHapticError = playHapticThud;
+export const toggleSoundMute = () => setHapticsEnabled(!isHapticsEnabled());

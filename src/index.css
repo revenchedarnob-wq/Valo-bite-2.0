@@ -4,10 +4,18 @@
   /* ——— Quiet Luxury palette ——— */
   --color-alabaster: #f4f3ef;
   --color-alabaster-deep: #eceae2;
-  --color-ink: #211e19;
-  --color-ink-soft: #57524a;
-  --color-stone-mute: #948d80;
+  /* Deepened from #211e19 / #57524a for stronger reading contrast. */
+  --color-ink: #1b1813;
+  /* Headings only — one step deeper so display type visibly outweighs
+     body copy instead of everything reading at the same volume. */
+  --color-ink-strong: #0f0d09;
+  --color-ink-soft: #49443c;
+  --color-stone-mute: #8a8274;
   --color-clay: #b3a184;
+  /* Lighter clay for accent text sitting on dark scrims/images. */
+  --color-clay-light: #d9c7a8;
+  /* Darker clay for accent text/icons that must hold on cream. */
+  --color-clay-deep: #96774c;
   --color-frost: rgba(255, 255, 255, 0.42);
 
   /* ——— Dual typography pairing ——— */
@@ -63,9 +71,31 @@ body {
   overflow-x: clip;
 }
 
+/* ——— Display type carries the deepest ink on the page ————————
+   Headings jump ahead of body copy; accent-colored <em> inside
+   headings still wins via class specificity. */
+h1,
+h2,
+h3 {
+  color: var(--color-ink-strong);
+}
+
 ::selection {
   background: var(--color-ink);
   color: var(--color-alabaster);
+}
+
+/* ——— Fine analog print grain (static luxury paper finish) —————
+   A second, stiller texture than the animated .grain overlay: barely
+   there at 3%, it gives flat surfaces a printed-paper tooth. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
 }
 
 /* ——— Keyboard focus: visible only for keyboard users ——— */
@@ -197,4 +227,41 @@ html {
 }
 .btn-shine:hover::after {
   transform: translateX(130%) skewX(-18deg);
+}
+
+/* ——— Apple Liquid Glass token — iridescent multi-stop gradient +
+   prism bevel. One shader for every card, container, and island. ——— */
+.glass-vision {
+  position: relative;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.04),
+    0 24px 60px -20px rgba(33, 30, 25, 0.16),
+    0 8px 24px -10px rgba(33, 30, 25, 0.08);
+  transition:
+    background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-vision:hover {
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.65) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 3px 0 rgba(0, 0, 0, 0.05),
+    0 40px 90px -25px rgba(33, 30, 25, 0.26);
 }

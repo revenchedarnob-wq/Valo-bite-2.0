@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { playHapticClick, playHapticSwoosh, playHapticThud, playHoverBlip } from "@/lib/sound";
-import { openCommissionDrawer } from "./CommissionDrawer";
+import { scrollToSelector } from "@/lib/scroll";
+import { openSellerDrawer } from "./CommissionDrawer";
 import { Bloom } from "./Bloom";
 import { EASE_LUXE } from "@/lib/motion-presets";
 
 const LINKS = [
-  { label: "Home", to: "/" },
-  { label: "Studio", to: "/studio" },
-  { label: "Archive", to: "/archive" },
+  { label: "Discover", anchor: "#top" },
+  { label: "Sellers", anchor: "#sellers" },
+  { label: "Trending", anchor: "#products" },
 ];
 
 /**
@@ -23,6 +24,7 @@ const LINKS = [
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   // Close on any route change (link taps inside the menu navigate).
   useEffect(() => {
@@ -116,19 +118,26 @@ export function MobileMenu() {
               <nav aria-label="Mobile" className="relative flex flex-col gap-2">
               {LINKS.map((link, i) => (
                 <motion.div
-                  key={link.to}
+                  key={link.label}
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 16 }}
                   transition={{ ...EASE_LUXE, delay: 0.08 + i * 0.07 }}
                 >
                   <Link
-                    to={link.to}
-                    onClick={() => playHapticClick()}
+                    to="/"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      playHapticClick();
+                      toggle();
+                      navigate("/");
+                      window.setTimeout(
+                        () => scrollToSelector(link.anchor),
+                        340,
+                      );
+                    }}
                     onMouseEnter={() => playHoverBlip()}
-                    className={`font-display flex items-baseline gap-4 border-b border-ink/[0.07] py-5 text-5xl ${
-                      pathname === link.to ? "text-clay italic" : "text-ink"
-                    }`}
+                    className="font-display flex items-baseline gap-4 border-b border-ink/[0.07] py-5 text-5xl text-ink"
                   >
                     <span className="text-[11px] font-sans font-semibold tracking-[0.3em] text-stone-mute">
                       {String(i + 1).padStart(2, "0")}
@@ -150,18 +159,18 @@ export function MobileMenu() {
                   onClick={() => {
                     playHapticClick();
                     toggle();
-                    window.setTimeout(() => openCommissionDrawer(), 320);
+                    window.setTimeout(() => openSellerDrawer(), 320);
                   }}
                   onMouseEnter={() => playHoverBlip()}
                   className="btn-shine cursor-pointer rounded-full bg-ink px-8 py-4 text-[12px] font-semibold tracking-[0.18em] text-alabaster uppercase"
                 >
-                  Begin a commission
+                  Start Selling Today
                 </button>
                 <div className="flex items-center gap-5">
                   {[
                     { label: "Instagram", href: "https://instagram.com" },
-                    { label: "Are.na", href: "https://are.na" },
-                    { label: "LinkedIn", href: "https://linkedin.com" },
+                    { label: "X", href: "https://x.com" },
+                    { label: "Facebook", href: "https://facebook.com" },
                   ].map((social) => (
                     <a
                       key={social.label}
@@ -178,7 +187,7 @@ export function MobileMenu() {
                 </div>
                 <p className="flex items-center gap-3 text-[11px] tracking-[0.24em] text-stone-mute uppercase">
                   <Bloom size={14} color="#b3a184" />
-                  Zürich · Kyoto · Mexico City
+                  The multi-seller marketplace
                 </p>
               </motion.div>
             </motion.div>

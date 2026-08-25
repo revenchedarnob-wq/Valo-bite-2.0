@@ -1,75 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { animate, motion, useInView } from "motion/react";
+import { motion } from "motion/react";
 import {
   isHapticsEnabled,
   playHapticClick,
   startAmbientTelemetry,
   stopAmbientTelemetry,
 } from "@/lib/sound";
-import { EASE_LUXE } from "@/lib/motion-presets";
 import { SplitReveal } from "./SplitReveal";
-
-/* ——— Animated count-up number ——————————————————————————————————— */
-function CountUp({
-  to,
-  format,
-  duration = 2.4,
-}: {
-  to: number;
-  format: (value: number) => string;
-  duration?: number;
-}) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-
-  useEffect(() => {
-    if (!inView || !ref.current) return;
-    const controls = animate(0, to, {
-      duration,
-      ease: EASE_LUXE,
-      onUpdate: (value) => {
-        if (ref.current) ref.current.textContent = format(value);
-      },
-    });
-    return () => controls.stop();
-  }, [inView, to, duration, format]);
-
-  return <span ref={ref}>{format(0)}</span>;
-}
-
-const STATS: Array<{
-  to: number;
-  format: (v: number) => string;
-  unit: string;
-  note: string;
-}> = [
-  {
-    to: 86_000,
-    format: (v) => Math.round(v).toLocaleString("en-US"),
-    unit: "Hours simulated",
-    note: "Cumulative daylight & occupancy simulation across the archive.",
-  },
-  {
-    to: 120,
-    format: (v) => String(Math.round(v)),
-    unit: "FPS compute ceiling",
-    note: "Realtime ray-traced preview sustained on studio hardware.",
-  },
-  {
-    to: -42,
-    format: (v) => `−${Math.abs(Math.round(v))}`,
-    unit: "dB acoustic calibration",
-    note: "Quietest measured interior in the Hush Chambers series.",
-  },
-];
 
 /* ——— Live waveform visualizer fed by a real AnalyserNode ————————— */
 function Waveform() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const [live, setLive] = useState(false);
+
+  // Live-feeling order ticker — drifts upward at irregular intervals so
+  // the pulse section reads as informative, not purely decorative.
+  const [ordersToday, setOrdersToday] = useState(347);
+  useEffect(() => {
+    let timer: number;
+    const tick = () => {
+      setOrdersToday((n) => n + Math.floor(Math.random() * 3) + 1);
+      timer = window.setTimeout(tick, 2800 + Math.random() * 4200);
+    };
+    timer = window.setTimeout(tick, 3200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const paint = (analyser: AnalyserNode | null) => {
     const canvas = canvasRef.current;
@@ -156,11 +114,11 @@ function Waveform() {
     <div className="frost-pill relative overflow-hidden rounded-[2rem] p-6 md:p-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <p className="text-[11px] font-semibold tracking-[0.28em] text-stone-mute uppercase">
-          Room tone · A₂ minor pad
+          Live sales pulse · synthesized pad
         </p>
         <button
           onClick={toggle}
-          disabled={!isHapticsEnabled()}
+          onMouseEnter={() => playHapticClick()}
           className="inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-ink/15 px-4 py-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-ink transition-colors hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <span className="relative flex h-2 w-2">
@@ -174,6 +132,24 @@ function Waveform() {
           {live ? "∥ Silence" : "+ Calibrate"}
         </button>
       </div>
+
+      {/* live order stat — gives the abstract wave a concrete anchor */}
+      <div className="mb-4 flex flex-wrap items-end gap-x-3 gap-y-1">
+        <span className="relative flex h-2.5 w-2.5 self-center">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-clay opacity-70" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-clay-deep" />
+        </span>
+        <p
+          className="font-display text-4xl leading-none tracking-tight tabular-nums md:text-5xl"
+          aria-live="polite"
+        >
+          {ordersToday.toLocaleString("en-US")}
+        </p>
+        <p className="pb-0.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-stone-mute">
+          orders today · and counting
+        </p>
+      </div>
+
       <canvas ref={canvasRef} className="block h-36 w-full md:h-40" aria-hidden />
       {!isHapticsEnabled() && (
         <p className="absolute inset-x-0 bottom-5 text-center text-[11px] tracking-[0.2em] text-stone-mute uppercase">
@@ -184,64 +160,37 @@ function Waveform() {
   );
 }
 
-/* ——— Studio telemetry section ——————————————————————————————————— */
-export function Telemetry() {
+/**
+ * Pulse — the old spatial-audio telemetry, repurposed as a live
+ * marketplace-activity visualizer. The waveform is still driven by a
+ * real AnalyserNode: press calibrate and the marketplace literally sings.
+ */
+export function Pulse() {
   return (
-    <section id="telemetry" className="mx-auto max-w-7xl px-6 py-28 md:py-36">
+    <section id="pulse" className="mx-auto max-w-7xl px-6 py-28 md:py-36">
       <div className="mb-16 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.45em] text-stone-mute">
-            Studio Telemetry
+            Marketplace Pulse
           </p>
           <h2 className="font-display mt-5 max-w-2xl text-5xl leading-[1.02] md:text-6xl">
-            <SplitReveal text="Measured, not" delay={0.05} />{" "}
+            <SplitReveal text="Live, not" delay={0.05} />{" "}
             <em className="text-clay italic">
-              <SplitReveal text="decorated" delay={0.35} />
+              <SplitReveal text="loud" delay={0.35} />
             </em>
           </h2>
         </div>
         <p className="max-w-xs text-sm leading-relaxed text-stone-mute">
-          Every aesthetic decision at Aether is backed by a number. These are
-          the ones we brag about quietly.
+          A quiet heartbeat for the marketplace — every sale, listing, and
+          payout leaves a trace. Press calibrate to hear the room.
         </p>
       </div>
 
-      {/* Performance matrix */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {STATS.map((stat, i) => (
-          <motion.div
-            key={stat.unit}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{
-              type: "spring",
-              stiffness: 350,
-              damping: 26,
-              delay: i * 0.1,
-            }}
-            className="rounded-[2rem] border border-ink/[0.07] bg-white/45 p-8 shadow-[0_32px_80px_-48px_rgba(33,30,25,0.25)] backdrop-blur-sm md:p-10"
-          >
-            <p className="font-display text-6xl leading-none tracking-tight tabular-nums md:text-7xl">
-              <CountUp to={stat.to} format={stat.format} />
-            </p>
-            <p className="mt-4 text-[11px] font-semibold tracking-[0.24em] text-ink uppercase">
-              {stat.unit}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-stone-mute">
-              {stat.note}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Live waveform */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ type: "spring", stiffness: 350, damping: 26, delay: 0.15 }}
-        className="mt-6"
       >
         <Waveform />
       </motion.div>

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { playHapticFlick } from "@/lib/sound";
-import { openCommissionDrawer } from "@/components/CommissionDrawer";
+import { openSellerDrawer } from "@/components/CommissionDrawer";
 import { Magnetic } from "@/components/Magnetic";
 import { SplitReveal } from "@/components/SplitReveal";
 import { Bloom } from "@/components/Bloom";
@@ -149,7 +149,7 @@ export default function Studio() {
           <button
             onClick={() => {
               playHapticFlick();
-              openCommissionDrawer();
+              openSellerDrawer();
             }}
             className="btn-shine group inline-flex cursor-pointer items-center gap-3 rounded-full bg-ink px-8 py-4 text-[13px] font-semibold tracking-[0.12em] text-alabaster uppercase shadow-[0_16px_40px_-16px_rgba(33,30,25,0.5)] transition-transform duration-500 hover:scale-[1.04]"
           >

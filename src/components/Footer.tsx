@@ -1,178 +1,202 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  AnimatePresence,
-  motion,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { motion } from "motion/react";
 import {
   playHapticClick,
+  playHapticFlick,
+  playHapticThud,
   playHoverBlip,
-  playHapticSuccess,
 } from "@/lib/sound";
-import { SPRING_BOUNCE } from "@/lib/motion-presets";
-import { scrollToSelector } from "@/lib/scroll";
-import { openCommissionDrawer } from "./CommissionDrawer";
-import { Magnetic } from "./Magnetic";
+import { scrollTopSmooth, scrollToSelector } from "@/lib/scroll";
 import { Bloom } from "./Bloom";
 
 const LUXE = { type: "spring", stiffness: 350, damping: 26, mass: 0.6 } as const;
 
-/* ——— Email → clipboard copy with toast badge + particle ripple ——— */
-const STUDIO_EMAIL = "studio@aetherspatial.com";
-
-function CopyEmail() {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(STUDIO_EMAIL);
-    } catch {
-      // Clipboard API unavailable (http / permissions) — fallback path.
-      const helper = document.createElement("textarea");
-      helper.value = STUDIO_EMAIL;
-      document.body.appendChild(helper);
-      helper.select();
-      document.execCommand("copy");
-      helper.remove();
-    }
-    playHapticSuccess();
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2200);
+/* ——— Back to top — the dock's flick-and-settle, footer edition ———— */
+function BackToTop() {
+  const backToTop = () => {
+    playHapticFlick();
+    scrollTopSmooth();
+    // A soft landing thud once the glide reaches the top.
+    window.setTimeout(() => playHapticThud(), 1450);
   };
 
   return (
-    <span className="relative inline-block">
-      {/* particle ripple on copy */}
-      <AnimatePresence>
-        {copied &&
-          [...Array(6)].map((_, i) => (
-            <motion.span
-              key={`${Date.now()}-${i}`}
-              aria-hidden
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-              animate={{
-                x: Math.cos((i / 6) * Math.PI * 2) * 38,
-                y: Math.sin((i / 6) * Math.PI * 2) * 26,
-                opacity: 0,
-                scale: 0.2,
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="pointer-events-none absolute top-1/2 left-1/4 h-1 w-1 rounded-full bg-clay"
-            />
-          ))}
-      </AnimatePresence>
-
-      <button
-        type="button"
-        onClick={copy}
-        onMouseEnter={() => playHoverBlip()}
-        title="Copy email address"
-        className="group inline-flex cursor-pointer items-center gap-2 text-sm text-ink-soft underline decoration-ink/25 underline-offset-8 transition-all duration-300 hover:text-ink hover:decoration-ink hover:underline-offset-4"
-      >
-        {STUDIO_EMAIL}
-        <svg
-          width="13"
-          height="13"
-          viewBox="0 0 14 14"
-          fill="none"
-          aria-hidden
-          className="opacity-50 transition-opacity group-hover:opacity-100"
-        >
-          <rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" />
-          <path d="M9.5 4.5V3A1.5 1.5 0 0 0 8 1.5H3A1.5 1.5 0 0 0 1.5 3v5A1.5 1.5 0 0 0 3 9.5h1.5" stroke="currentColor" />
+    <button
+      type="button"
+      onClick={backToTop}
+      onMouseEnter={() => playHoverBlip()}
+      className="group inline-flex cursor-pointer items-center gap-3 text-[11px] font-semibold tracking-[0.22em] text-ink uppercase"
+    >
+      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:border-ink/40">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden>
+          <path
+            d="M7 12V2M7 2L2.5 6.5M7 2l4.5 4.5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
-      </button>
-
-      {/* toast badge */}
-      <AnimatePresence>
-        {copied && (
-          <motion.span
-            initial={{ opacity: 0, y: 8, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={SPRING_BOUNCE}
-            role="status"
-            className="absolute -top-10 left-1/2 z-10 -translate-x-1/2 rounded-full bg-ink px-3.5 py-1.5 text-[10px] font-semibold tracking-[0.18em] whitespace-nowrap text-alabaster uppercase shadow-[0_12px_28px_-10px_rgba(33,30,25,0.55)]"
-          >
-            Copied to clipboard ✓
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </span>
+      </span>
+      Back to Top
+    </button>
   );
 }
 
-const OFFICES: Array<{ city: string; detail: string }> = [
-  { city: "Zürich", detail: "Limmatstrasse 152 · 8005" },
-  { city: "Kyoto", detail: "Nakagyō-ku · Sanjō" },
-  { city: "Mexico City", detail: "Roma Norte · CDMX" },
+/* ——— Social glyph buttons ————————————————————————————————————— */
+const SOCIALS: Array<{
+  label: string;
+  href: string;
+  glyph: React.JSX.Element;
+}> = [
+  {
+    label: "Instagram",
+    href: "https://instagram.com",
+    glyph: (
+      <>
+        <rect x="1.8" y="1.8" width="12.4" height="12.4" rx="4" stroke="currentColor" strokeWidth="1.3" />
+        <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.3" />
+        <circle cx="12" cy="4" r="0.9" fill="currentColor" />
+      </>
+    ),
+  },
+  {
+    label: "X",
+    href: "https://x.com",
+    glyph: (
+      <path
+        d="M2.5 2.5l11 11m0-11l-11 11"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    ),
+  },
+  {
+    label: "Facebook",
+    href: "https://facebook.com",
+    glyph: (
+      <path
+        d="M9.8 14V8.6h1.9l.3-2.3H9.8V4.8c0-.7.2-1.2 1.2-1.2h1.1V1.5s-.9-.1-1.8-.1c-1.9 0-3.1 1.1-3.1 3.1v1.8H5.2v2.3h2V14"
+        fill="currentColor"
+      />
+    ),
+  },
+];
+
+/* ——— Payment method marks ————————————————————————————————————— */
+/* Brand-colored logo marks rendered inline so no external assets are
+   needed. Each sits in a white chip for legibility on cream. */
+const PAYMENT_MARKS: Array<{ label: string; mark: React.JSX.Element }> = [
+  {
+    label: "Visa",
+    mark: (
+      <span
+        className="text-[15px] leading-none font-extrabold italic tracking-tight"
+        style={{ color: "#1A1F71", fontFamily: "Arial, sans-serif" }}
+      >
+        VISA
+      </span>
+    ),
+  },
+  {
+    label: "Mastercard",
+    mark: (
+      <svg width="34" height="21" viewBox="0 0 34 21" aria-hidden>
+        <circle cx="13" cy="10.5" r="9" fill="#EB001B" />
+        <circle cx="21" cy="10.5" r="9" fill="#F79E1B" fillOpacity="0.92" />
+        <path
+          d="M17 3.4a9 9 0 0 1 0 14.2 9 9 0 0 1 0-14.2Z"
+          fill="#FF5F00"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "American Express",
+    mark: (
+      <svg width="34" height="21" viewBox="0 0 34 21" aria-hidden>
+        <rect width="34" height="21" rx="3" fill="#2E77BC" />
+        <text
+          x="17"
+          y="13.8"
+          textAnchor="middle"
+          fill="#fff"
+          fontFamily="Arial, sans-serif"
+          fontSize="8"
+          fontWeight="800"
+          letterSpacing="0.5"
+        >
+          AMEX
+        </text>
+      </svg>
+    ),
+  },
+  {
+    label: "PayPal",
+    mark: (
+      <span
+        className="text-[13px] leading-none font-extrabold italic tracking-tight"
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
+        <span style={{ color: "#003087" }}>Pay</span>
+        <span style={{ color: "#009CDE" }}>Pal</span>
+      </span>
+    ),
+  },
+  {
+    label: "Apple Pay",
+    mark: (
+      <span className="inline-flex items-center gap-1">
+        <svg width="13" height="16" viewBox="0 0 20 24" aria-hidden>
+          <path
+            d="M12.7 2.9c.6-.8 1.1-1.9.9-3-.9.1-2 .7-2.7 1.5-.6.7-1.1 1.8-.9 2.9 1 0 2-.6 2.7-1.4ZM16.4 12.2c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.9-1.4-.1-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.6-1-2.6-3.4Z"
+            fill="#000"
+          />
+        </svg>
+        <span className="text-[13px] leading-none font-bold text-black">
+          Pay
+        </span>
+      </span>
+    ),
+  },
 ];
 
 const LINK_GROUPS: Array<{
   title: string;
-  links: Array<{ label: string; href?: string; to?: string; anchor?: string }>;
+  links: Array<{ label: string; anchor?: string }>;
 }> = [
   {
-    title: "Studio",
+    title: "Site Map",
     links: [
-      { label: "Philosophy", to: "/studio" },
-      { label: "Works", to: "/archive" },
-      { label: "Telemetry", to: "/", anchor: "#telemetry" },
+      { label: "Discover", anchor: "#top" },
+      { label: "Sellers", anchor: "#sellers" },
+      { label: "Trending", anchor: "#products" },
+      { label: "Profile" },
+      { label: "Contact Us", anchor: "#contact" },
     ],
   },
   {
-    title: "Studies",
+    title: "Legal",
     links: [
-      { label: "Volumetric", to: "/archive/petal-field-pavilion" },
-      { label: "Acoustics", to: "/archive/hush-chambers-ii" },
-      { label: "Light Studies", to: "/archive/alabaster-drift" },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { label: "Instagram", href: "https://instagram.com" },
-      { label: "Are.na", href: "https://are.na" },
-      { label: "LinkedIn", href: "https://linkedin.com" },
+      { label: "Privacy Policy" },
+      { label: "Terms of Service" },
+      { label: "Refund Policy" },
+      { label: "Shipping Information" },
     ],
   },
 ];
 
 type FooterLinkProps = {
   label: string;
-  href?: string;
-  to?: string;
   anchor?: string;
 };
 
-function FooterLink({ label, href, to, anchor }: FooterLinkProps) {
+function FooterLink({ label, anchor }: FooterLinkProps) {
   const navigate = useNavigate();
-
-  if (href) {
-    return (
-      <motion.a
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        onClick={() => playHapticClick()}
-        onMouseEnter={() => playHoverBlip()}
-        whileHover={{ x: 4 }}
-        transition={LUXE}
-        className="group inline-flex cursor-pointer items-center gap-2 text-sm text-ink-soft transition-colors duration-300 hover:text-ink"
-      >
-        <span
-          aria-hidden
-          className="h-1 w-1 -translate-x-1 rounded-full bg-clay opacity-0 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0 group-hover:opacity-100"
-        />
-        {label}
-      </motion.a>
-    );
-  }
 
   return (
     <motion.div
@@ -182,10 +206,10 @@ function FooterLink({ label, href, to, anchor }: FooterLinkProps) {
       className="group inline-block"
     >
       <Link
-        to={to ?? "/"}
+        to="/"
         onClick={(e) => {
           playHapticClick();
-          if (anchor && to === "/") {
+          if (anchor) {
             e.preventDefault();
             navigate("/");
             window.setTimeout(() => scrollToSelector(anchor), 140);
@@ -205,18 +229,12 @@ function FooterLink({ label, href, to, anchor }: FooterLinkProps) {
 
 export function Footer() {
   const footRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: footRef,
-    offset: ["start end", "end end"],
-  });
-  // The giant wordmark drifts gently against scroll direction.
-  const wordmarkX = useTransform(scrollYProgress, [0, 1], [70, -70]);
 
   return (
     <footer
       ref={footRef}
       id="contact"
-      className="hairline relative overflow-hidden border-t px-6 pt-28 pb-8 md:pt-36"
+      className="hairline relative overflow-hidden border-t px-6 pt-20 pb-8 md:pt-28"
     >
       {/* oversized ambient bloom */}
       <Bloom
@@ -226,95 +244,72 @@ export function Footer() {
       />
 
       <div className="relative mx-auto max-w-7xl">
-        {/* ——— CTA block ——— */}
-        <div className="flex flex-col justify-between gap-14 lg:flex-row lg:items-end">
+        {/* ——— Escrow & support callout ——— */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ ...LUXE }}
+          className="frost-pill relative flex flex-col gap-4 rounded-[2rem] p-6 shadow-[0_28px_70px_-36px_rgba(33,30,25,0.32)] sm:flex-row sm:items-center md:p-8"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-clay-deep/30 bg-white/50 text-clay-deep">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
+              <path
+                d="M10 2.5 16 5v5c0 4-2.7 6.6-6 7.5C6.7 16.6 4 14 4 10V5l6-2.5Z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              <path
+                d="m7.6 9.8 1.7 1.7 3.1-3.2"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <p className="text-sm leading-relaxed text-ink-soft">
+            <span className="font-semibold text-ink">
+              Escrow &amp; Support
+            </span>{" "}
+            — For any payment issues, contact the{" "}
+            <a
+              href="https://aelvyra.example"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => playHapticClick()}
+              onMouseEnter={() => playHoverBlip()}
+              className="text-ink underline decoration-clay/60 underline-offset-4 transition-colors duration-300 hover:decoration-clay"
+            >
+              Aelvyra Transaction Hub
+            </a>
+            . Payments are controlled securely by Aelvyra Transaction Hub.
+          </p>
+        </motion.div>
+
+        {/* ——— Brand + navigation columns ——— */}
+        <div className="hairline mt-16 grid grid-cols-1 gap-y-12 border-t pt-14 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-x-8">
           <div>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="text-[11px] font-medium uppercase tracking-[0.45em] text-stone-mute"
+            <Link
+              to="/"
+              onClick={() => playHapticClick()}
+              onMouseEnter={() => playHoverBlip()}
+              className="inline-flex cursor-pointer items-center gap-3"
             >
-              Commissions — 2026
-            </motion.p>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 48, filter: "blur(6px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ ...LUXE }}
-              className="font-display mt-6 max-w-4xl text-6xl leading-[1.02] md:text-8xl"
-            >
-              Let us grow your{" "}
-              <em className="text-clay italic">next</em> space.
-            </motion.h2>
-
-            <motion.div
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ ...LUXE, delay: 0.15 }}
-              className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4"
-            >
-              <Magnetic strength={0.25}>
-                <motion.button
-                  onClick={() => {
-                    playHapticClick();
-                    openCommissionDrawer();
-                  }}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.94 }}
-                  transition={LUXE}
-                  className="btn-shine group inline-flex cursor-pointer items-center gap-3 rounded-full bg-ink px-8 py-4 text-[13px] font-semibold tracking-[0.12em] text-alabaster uppercase shadow-[0_16px_40px_-16px_rgba(33,30,25,0.5)]"
-                >
-                  Begin a commission
-                  <span
-                    aria-hidden
-                    className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
-                </motion.button>
-              </Magnetic>
-              <CopyEmail />
-            </motion.div>
-          </div>
-
-          {/* Offices */}
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ ...LUXE, delay: 0.25 }}
-            className="grid shrink-0 grid-cols-1 gap-5 sm:grid-cols-3 lg:w-auto"
-          >
-            {OFFICES.map((office) => (
-              <div key={office.city}>
-                <p className="text-[11px] font-semibold tracking-[0.24em] text-ink uppercase">
-                  {office.city}
-                </p>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-stone-mute">
-                  {office.detail}
-                </p>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* ——— Navigation columns ——— */}
-        <div className="hairline mt-24 grid grid-cols-2 gap-x-8 gap-y-12 border-t pt-14 md:grid-cols-5">
-          <div className="col-span-2">
-            <Link to="/" onClick={() => playHapticClick()} className="inline-flex cursor-pointer items-center gap-3">
               <Bloom size={22} />
               <span className="text-[12px] font-semibold uppercase tracking-[0.28em] text-ink">
-                Aether Spatial
+                Valobite
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-mute">
-              A generative spatial design studio crafting quiet, computational
-              environments where architecture learns to breathe.
+              Your premium destination for discovering elite merchants,
+              trending products, and exclusive collections. We bridge the gap
+              between quality sellers and discerning buyers.
             </p>
+            <div className="mt-7">
+              <BackToTop />
+            </div>
           </div>
 
           {LINK_GROUPS.map((group) => (
@@ -331,28 +326,64 @@ export function Footer() {
               </ul>
             </div>
           ))}
+
+          {/* Connect */}
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.24em] text-stone-mute uppercase">
+              Connect
+            </p>
+            <div className="mt-5 flex items-center gap-3">
+              {SOCIALS.map((social) => (
+                <motion.a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={social.label}
+                  onClick={() => playHapticClick()}
+                  onMouseEnter={() => playHoverBlip()}
+                  whileHover={{ y: -3 }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={LUXE}
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-ink/[0.12] text-ink-soft transition-colors duration-300 hover:border-ink/35 hover:text-ink"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    {social.glyph}
+                  </svg>
+                </motion.a>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* ——— Giant editorial wordmark ——— */}
-        <div aria-hidden className="mt-20 overflow-hidden select-none">
-          <motion.p
-            initial={{ y: "35%", opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ ...LUXE }}
-            style={{ x: wordmarkX }}
-            className="font-display text-center text-[clamp(2.6rem,10vw,9rem)] leading-[0.95] whitespace-nowrap text-ink/[0.08] will-change-transform"
-          >
-            Aether Spatial
-          </motion.p>
+        {/* ——— Secured payments ——— */}
+        <div className="hairline mt-16 flex flex-wrap items-center justify-between gap-6 border-t pt-8">
+          <p className="text-[11px] font-semibold tracking-[0.24em] text-stone-mute uppercase">
+            Secured Payments
+          </p>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {PAYMENT_MARKS.map((method) => (
+              <span
+                key={method.label}
+                role="img"
+                aria-label={method.label}
+                title={method.label}
+                className="flex h-10 min-w-14 items-center justify-center rounded-xl border border-ink/[0.12] bg-white/60 px-3.5 shadow-[0_1px_3px_rgba(33,30,25,0.08)] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_4px_12px_rgba(33,30,25,0.12)]"
+              >
+                {method.mark}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* ——— Legal bar ——— */}
         <div className="hairline mt-10 flex flex-wrap items-center justify-between gap-4 border-t pt-7 pb-2 text-[12px] tracking-wide text-stone-mute">
-          <span>© 2026 — All spaces reserved</span>
-          <span>Zürich · Kyoto · Mexico City</span>
+          <span>© 2026 Valobite. All rights reserved.</span>
+          <span>Made and owned by Aelvyra</span>
         </div>
+
       </div>
     </footer>
   );
 }
+

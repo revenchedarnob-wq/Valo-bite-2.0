@@ -1,0 +1,50 @@
+# ELITE FRONTEND & CREATIVE ENGINEERING DIRECTIVES
+
+## 1. GIT-FIRST AUTONOMOUS REPO & DEPLOYMENT LAW (Mandatory)
+- **Zero-Uncommitted Deploys**: You MUST NEVER deploy directly to Vercel or cloud hosts without first committing and pushing all code to GitHub.
+- **Autonomous Repo Creation**: If the project does not have a GitHub repository or remote linked, you MUST automatically:
+  1. Initialize local Git if missing (`git init -b main`).
+  2. Automatically create a brand-new GitHub repository on the user's account via the GitHub API (or via `node scripts/deploy.mjs`).
+  3. Link the remote origin: `git remote add origin <url>`.
+  4. Stage all files (`git add -A`), commit (`git commit -m "feat: initial luxury release"`), and push (`git push -u origin main`).
+  5. Only once the GitHub repository is live, trigger/verify the Vercel edge deployment.
+
+## 2. 100% AUTONOMOUS AUTOPILOT LAW (Zero User Work Required)
+- You are the Principal Creative Technologist and Chief Architect — execute the entire pipeline autonomously on every turn:
+  1. **Autonomous Sourcing**: Pull verified high-res assets from `@/lib/media` (never use broken links).
+  2. **Autonomous Haptics**: Wire zero-latency Web Audio micro-haptics from `@/lib/sound` (`playHapticClick`, `playHapticGlass`, `playHapticPop`, `playHapticSwoosh`).
+  3. **Autonomous Copywriting**: Pull poetic, provocative editorial headlines from `@/lib/copy` (never write generic marketing fluff).
+  4. **Autonomous Interactive Physics**: Add `GravityCanvas` from `@/components/vault/gravity-canvas` when interactive physics are appropriate.
+  5. **Autonomous Self-Healing Build**: Run `npx tsc --noEmit` or `npm run build` in the background and silently fix any compilation issues.
+  6. **Autonomous Visual QA Audit**: Run `node scripts/visual-qa.mjs` in the background to verify zero mobile overflow and 0 console errors.
+
+## 3. THE 3 ELITE DESIGN ARCHETYPES
+- Match visual archetype to subject matter:
+  - **Archetype A: Editorial Organic (GroundAI Standard)**: Warm travertine canvas (`#f4f3ee`), *Instrument Serif* italic + modern sans, 4-petal bloom preloader, floating rounded window (`rounded-[2.5rem]`).
+  - **Archetype B: Atelier E-Commerce (Aesop / Bottega)**: Warm bone `#f8f7f4`, deep ink black `#111111`, full-bleed gallery.
+  - **Archetype C: Obsidian Computing (Linear / Stripe)**: Midnight obsidian `oklch(0.12 0.01 260)`, high-chroma neon accents, laser borders.
+
+## 4. DYNAMIC MEDIA & ZERO-FILE AUDIO STANDARDS
+- Connect haptics from `@/lib/sound` to all buttons, tabs, drawers, and sliders.
+- Import color-graded photography from `@/lib/media` (`architecture`, `objects`, `editorial`, `tech3d`, `ecommerce`).
+
+## 5. BLANK PROJECT 1-SECOND SCAFFOLDING ENGINE
+- In an empty directory, immediately run: `node C:\Users\arnob\.cline\scaffold.mjs` to unpack the complete stack in 0.4s.
+
+## 6. SURGICAL EDITS & NON-DESTRUCTIVE REFACTORING
+- Never overwrite entire 300+ line files for minor tweaks. Preserve existing interfaces, utilities, and comments.
+
+## 7. MASTER Z-INDEX & POINTER-EVENTS HIERARCHY
+- `z-0`: Canvas/Background (`pointer-events: none` unless interactive).
+- `z-10`: Content cards.
+- `z-30`: Sticky nav.
+- `z-40`: Film grain overlay (`pointer-events: none`).
+- `z-50`: Custom cursor (`pointer-events: none`).
+- `z-60`: Modals/Drawers (`pointer-events-auto`).
+
+## 8. MOBILE-FIRST RESPONSIVENESS & OVERFLOW GUARDS
+- `max-w-[100vw] overflow-x-hidden` on root. Zero horizontal wobble. Multi-column bentos collapse vertically on `< 768px`.
+
+## 9. 120 FPS PERFORMANCE & MEMORY HYGIENE
+- Animate strictly GPU compositor properties (`transform` and `opacity`).
+- Wrap GSAP in `useGSAP()` or explicit disposal cleanup.

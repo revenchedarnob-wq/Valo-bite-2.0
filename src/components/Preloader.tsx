@@ -41,7 +41,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
         }}
         className="absolute bottom-16 text-[11px] uppercase text-stone-mute"
       >
-        Aether Spatial
+        Valobite
       </motion.p>
 
       {/* the bloom — blurred seed → overshoot → settle */}

@@ -14,6 +14,7 @@ export const EASE_SLOW: [number, number, number, number] = [0.25, 1, 0.5, 1];
 export const SPRING_TACTILE = { type: "spring", stiffness: 350, damping: 28 } as const;
 export const SPRING_BOUNCE = { type: "spring", stiffness: 420, damping: 18 } as const;
 export const SPRING_MODAL = { type: "spring", damping: 30, stiffness: 300 } as const;
+export const SPRING_JELLY = { type: "spring", stiffness: 240, damping: 16, mass: 0.45 } as const;
 
 export const FADE_UP_BLUR = {
   initial: { opacity: 0, y: 32, filter: "blur(8px)" },

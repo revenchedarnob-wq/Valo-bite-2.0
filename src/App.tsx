@@ -5,6 +5,7 @@ import { Preloader } from "@/components/Preloader";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { CommissionDrawer } from "@/components/CommissionDrawer";
+import { PeekSheet } from "@/components/PeekSheet";
 import { Dock } from "@/components/Dock";
 import { Cursor } from "@/components/Cursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -71,6 +72,7 @@ export default function App() {
             <AnimatedRoutes />
             <Dock />
             <CommissionDrawer />
+            <PeekSheet />
           </>
         )}
       </div>

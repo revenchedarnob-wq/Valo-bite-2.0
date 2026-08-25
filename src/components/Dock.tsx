@@ -12,7 +12,7 @@ import {
   subscribeHaptics,
 } from "@/lib/sound";
 import { scrollTopSmooth } from "@/lib/scroll";
-import { openCommissionDrawer } from "./CommissionDrawer";
+import { openSellerDrawer } from "./CommissionDrawer";
 import { Magnetic } from "./Magnetic";
 import { Bloom } from "./Bloom";
 
@@ -83,7 +83,7 @@ export function Dock() {
         {/* Commission shortcut */}
         <Magnetic strength={0.4}>
           <motion.button
-            onClick={openCommissionDrawer}
+            onClick={openSellerDrawer}
             onMouseEnter={() => playHoverBlip()}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.92 }}
@@ -91,7 +91,7 @@ export function Dock() {
             className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-[11px] font-semibold tracking-[0.16em] text-ink uppercase hover:bg-white/70"
           >
             <Bloom size={15} />
-            Inquire
+            Sell
           </motion.button>
         </Magnetic>
 
